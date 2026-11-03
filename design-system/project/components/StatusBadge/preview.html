@@ -1,0 +1,17 @@
+<!-- @dsCard group="Shop" height=72 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>StatusBadge - preview</title></head>
+<body>
+<div id="root" class="lj-row"></div>
+<script>
+  var L = window.LoongJoke, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(L.StatusBadge, { status: 'new' }),
+    h(L.StatusBadge, { status: 'making' }),
+    h(L.StatusBadge, { status: 'done' }),
+    h(L.StatusBadge, { status: 'out' })
+  ));
+</script>
+</body>
+</html>

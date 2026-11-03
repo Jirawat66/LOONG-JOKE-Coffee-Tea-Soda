@@ -1,0 +1,41 @@
+/* LOONG JOKE design tokens, copied from design-system/project/tokens.json (light theme only) */
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700;800&family=Kanit:wght@500;700&family=Prompt:wght@400;500;600&display=swap");
+
+:root {
+  color-scheme: light;
+  --surface: #fcf1e3;
+  --surface-raised: #fffaf2;
+  --line: #e8d3bd;
+  --ink: #24160f;
+  --ink-muted: #7a5a4a;
+  --ink-fixed: #24160f;
+  --brick: #b5441f;
+  --brick-deep: #8f3315;
+  --on-brick: #fcf1e3;
+  --butter: #f6e6a6;
+  --apricot: #fdc57d;
+  --navy: #2c3a78;
+  --leaf: #2f7a35;
+  --on-leaf: #fcf1e3;
+  --shadow-sticker: 3px 3px 0 #24160f;
+
+  --font-display: "League Spartan", "Kanit", system-ui, sans-serif;
+  --font-sans: "Prompt", "Kanit", system-ui, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  --stroke-bold: 3px;
+  --stroke-mid: 2px;
+  --stroke-hair: 1px;
+}
+

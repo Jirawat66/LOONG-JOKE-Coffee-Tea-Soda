@@ -1,0 +1,50 @@
+<!-- @dsCard height=320 -->
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>LOONG JOKE</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--surface); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:320px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:320px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:320px; }
+  .brick { fill:var(--brick); }
+  .apricot { fill:var(--apricot); }
+  .butter { fill:var(--butter); stroke:var(--ink); stroke-width:var(--stroke-bold); }
+  .navy { fill:var(--navy); }
+  .leaf { fill:var(--leaf); }
+  .slab { rx:var(--radius-lg); }
+  .tile { rx:var(--radius-sm); }
+  .words { position:absolute; left:var(--space-8); bottom:var(--space-8); max-width:440px; }
+  .name { margin:0; font-family:var(--font-display); font-size:112px; line-height:.95; font-weight:800; letter-spacing:-.02em; color:var(--ink); }
+  .tag { margin:var(--space-2) 0 0 4px; font-size:14px; line-height:20px; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 320" width="480" height="320">
+<!--
+  blocks      brick 488x232 slab bled off the top and right (the menu board's header band, the largest) · apricot 128x128 tile on it (the logo square) · butter 248x48 pill with a stroke-bold ink outline straddling the slab's bottom edge (the OPEN AT pill) · navy 424x64 band below
+  arrangement one header slab with its rounded bottom-left corner showing, satellites hung off it the way the printed menu stacks header, pill and content
+  pattern     stripes, from the logo's navy-and-green striped shirt: three leaf stripes space-2 tall at a space-4 pitch across the navy band
+  scales      sides in space-2 multiples; gutters space-4 and space-8; corners radius-lg (slab), radius-sm (tile, band), pill rx half of 48
+-->
+<rect class="brick slab" x="32" y="-40" width="488" height="232" rx="24"/>
+<rect class="apricot tile" x="64" y="32" width="128" height="128" rx="8"/>
+<rect class="butter" x="208" y="168" width="248" height="48" rx="24"/>
+<rect class="navy tile" x="32" y="232" width="424" height="64" rx="8"/>
+<rect class="leaf" x="32" y="240" width="424" height="8"/>
+<rect class="leaf" x="32" y="256" width="424" height="8"/>
+<rect class="leaf" x="32" y="272" width="424" height="8"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">LOONG JOKE</h1>
+<p class="tag">Coffee · Tea · Soda · เปิด 09:00–16:00</p>
+</div>
+</div>
+</body>
+</html>

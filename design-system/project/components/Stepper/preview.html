@@ -1,0 +1,16 @@
+<!-- @dsCard group="Inputs" height=88 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Stepper - preview</title></head>
+<body>
+<div id="root" class="lj-row"></div>
+<script>
+  var L = window.LoongJoke, h = React.createElement;
+  function Demo() {
+    var s = React.useState(2);
+    return h(L.Stepper, { value: s[0], onChange: s[1] });
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

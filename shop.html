@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>หน้าร้าน · LOONG JOKE</title>
+  <meta name="theme-color" content="#b5441f">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/shop.css">
+  <link rel="stylesheet" href="css/qr.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+  <script type="module" src="js/shop-page.js"></script>
+</head>
+<body class="shop">
+  <header class="hero shop-hero">
+    <div class="hero-inner shop-hero-inner">
+      <img class="hero-logo shop-logo" src="Photo/Logo.jpg" alt="" width="48" height="48">
+      <div class="hero-text">
+        <h1 class="shop-title">หน้าร้าน</h1>
+        <p class="shop-date" id="shop-date"></p>
+      </div>
+      <button type="button" class="lj-btn shop-logout" id="logout" hidden>ออกจากระบบ</button>
+    </div>
+  </header>
+
+  <p class="loading shop-wrap" id="loading">กำลังโหลด…</p>
+
+  <section class="login shop-wrap" id="login" hidden aria-labelledby="login-title">
+    <form class="login-card" id="login-form" novalidate>
+      <h2 class="sheet-title" id="login-title">ใส่รหัสเข้าหน้าร้าน</h2>
+      <label class="field-label" for="password">รหัส</label>
+      <input class="input" id="password" type="password" autocomplete="current-password" required>
+      <p class="error" id="login-error" role="alert" hidden></p>
+      <button type="submit" class="lj-btn lj-btn-primary sheet-action" id="login-btn">เข้าสู่ระบบ</button>
+      <p class="hint" id="demo-hint" hidden>โหมดทดลอง: รหัสคือ <code>demo1234</code></p>
+    </form>
+  </section>
+
+  <div class="shop-app" id="app" hidden>
+    <button type="button" class="sound-banner shop-wrap" id="sound-banner" hidden>แตะตรงนี้เพื่อเปิดเสียงแจ้งเตือนออเดอร์ใหม่</button>
+
+    <nav class="tabs shop-tabs" aria-label="หน้าร้าน">
+      <button type="button" class="tab" id="tab-orders" aria-current="true">ออเดอร์</button>
+      <button type="button" class="tab" id="tab-stock" aria-current="false">เมนูหมด</button>
+      <button type="button" class="tab" id="tab-report" aria-current="false">ยอดขาย</button>
+      <button type="button" class="tab" id="tab-qr" aria-current="false">QR โต๊ะ</button>
+    </nav>
+
+    <main class="shop-wrap" id="view-orders">
+      <div class="board">
+        <section class="lane" aria-labelledby="lane-new-title">
+          <h2 class="lane-title" id="lane-new-title">ใหม่ <span class="count" id="count-new">0</span></h2>
+          <ul class="tickets" id="lane-new"></ul>
+        </section>
+        <section class="lane" aria-labelledby="lane-making-title">
+          <h2 class="lane-title" id="lane-making-title">กำลังทำ <span class="count" id="count-making">0</span></h2>
+          <ul class="tickets" id="lane-making"></ul>
+        </section>
+        <section class="lane lane-finished" aria-labelledby="lane-finished-title">
+          <h2 class="lane-title" id="lane-finished-title">เสร็จแล้ว / ยกเลิก <span class="count" id="count-finished">0</span></h2>
+          <ul class="tickets" id="lane-finished"></ul>
+        </section>
+      </div>
+    </main>
+
+    <main class="shop-wrap" id="view-stock" hidden>
+      <p class="stock-help">กดที่เมนูเพื่อสลับระหว่าง "มีขาย" กับ "หมด" ลูกค้าจะเห็นทันที</p>
+      <div id="stock-list"></div>
+    </main>
+
+    <main class="shop-wrap report" id="view-report" hidden aria-label="ยอดขาย"></main>
+
+    <main class="shop-wrap" id="view-qr" hidden aria-label="QR โต๊ะ"></main>
+  </div>
+</body>
+</html>

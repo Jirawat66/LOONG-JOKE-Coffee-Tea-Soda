@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>LOONG JOKE · สั่งเครื่องดื่ม</title>
+  <meta name="theme-color" content="#b5441f">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/menu-page.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <img class="hero-logo" src="Photo/Logo.jpg" alt="โลโก้ LOONG JOKE" width="72" height="72">
+      <div class="hero-text">
+        <h1 class="hero-name">LOONG JOKE</h1>
+        <p class="hero-sub">COFFEE · TEA · SODA</p>
+      </div>
+    </div>
+    <p class="table-pill" id="table-pill" hidden></p>
+  </header>
+
+  <div class="notice" id="notice" hidden></div>
+
+  <nav class="tabs" id="tabs" aria-label="หมวดเมนู"></nav>
+
+  <main class="menu" id="menu">
+    <p class="loading">กำลังโหลดเมนู…</p>
+  </main>
+
+  <section class="my-orders" id="my-orders" hidden aria-labelledby="my-orders-title">
+    <h2 id="my-orders-title" class="section-title">ออเดอร์ของโต๊ะนี้</h2>
+    <ul class="order-list" id="order-list"></ul>
+  </section>
+
+  <div class="cartbar" id="cartbar" hidden>
+    <button type="button" class="lj-btn lj-btn-primary cartbar-btn" id="open-cart"></button>
+  </div>
+
+  <dialog class="sheet" id="item-sheet" aria-labelledby="item-title">
+    <form method="dialog" class="sheet-body" id="item-form">
+      <button type="submit" class="sheet-close" value="cancel" aria-label="ปิด">✕</button>
+      <div class="item-media" id="item-media"></div>
+      <h2 class="item-title" id="item-title"></h2>
+      <p class="item-th" id="item-th"></p>
+      <p class="item-price" id="item-price"></p>
+
+      <fieldset class="field">
+        <legend class="field-label">ความหวาน</legend>
+        <div class="chips" id="sweetness"></div>
+      </fieldset>
+
+      <div class="field">
+        <span class="field-label" id="qty-label">จำนวน</span>
+        <div class="lj-stepper" role="group" aria-labelledby="qty-label">
+          <button type="button" class="lj-step-btn" id="qty-minus" aria-label="ลดจำนวน">−</button>
+          <output class="lj-step-val" id="qty-value" aria-live="polite">1</output>
+          <button type="button" class="lj-step-btn" id="qty-plus" aria-label="เพิ่มจำนวน">+</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="item-note">หมายเหตุ <span class="optional">(ไม่บังคับ)</span></label>
+        <input class="input" id="item-note" type="text" maxlength="60" placeholder="เช่น น้ำแข็งน้อย" autocomplete="off">
+      </div>
+
+      <button type="button" class="lj-btn lj-btn-primary sheet-action" id="add-to-cart"></button>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="cart-sheet" aria-labelledby="cart-title">
+    <form method="dialog" class="sheet-body">
+      <button type="submit" class="sheet-close" value="cancel" aria-label="ปิด">✕</button>
+      <h2 class="sheet-title" id="cart-title">ตะกร้าของคุณ</h2>
+      <ul class="cart-list" id="cart-list"></ul>
+      <div class="cart-total">
+        <span>รวม</span>
+        <span class="price" id="cart-total"></span>
+      </div>
+      <p class="pay-note">ชำระเงินที่เคาน์เตอร์ (เงินสด / พร้อมเพย์)</p>
+      <p class="error" id="cart-error" role="alert" hidden></p>
+      <button type="button" class="lj-btn lj-btn-primary sheet-action" id="place-order"></button>
+    </form>
+  </dialog>
+</body>
+</html>

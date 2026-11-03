@@ -1,0 +1,19 @@
+<!-- @dsCard group="Inputs" height=88 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Chip - preview</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var L = window.LoongJoke, h = React.createElement;
+  var levels = ['ไม่หวาน', 'หวานน้อย', 'ปกติ', 'หวานมาก'];
+  function Demo() {
+    var s = React.useState('ปกติ');
+    return h('div', { className: 'lj-row', role: 'group', 'aria-label': 'ความหวาน' }, levels.map(function (lv) {
+      return h(L.Chip, { key: lv, selected: s[0] === lv, onClick: function () { s[1](lv); } }, lv);
+    }));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

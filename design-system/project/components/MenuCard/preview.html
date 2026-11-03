@@ -1,0 +1,18 @@
+<!-- @dsCard group="Menu" height=420 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>MenuCard - preview</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var L = window.LoongJoke, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 200px))', gap: 'var(--space-4)', padding: 'var(--space-4)' } },
+      h(L.MenuCard, { name: 'Thai Tea', nameTh: 'ชาไทย', price: 50, image: '/_blob/1540d91ba232d64ae4c016e42101e0fd' }),
+      h(L.MenuCard, { name: 'Caramel Latte', nameTh: 'ลาเต้คาราเมล', price: 60, image: '' }),
+      h(L.MenuCard, { name: 'Coconut Americano', nameTh: 'อเมริกาโนน้ำมะพร้าว', price: 65, image: '', available: false })
+    )
+  );
+</script>
+</body>
+</html>

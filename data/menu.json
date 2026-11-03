@@ -1,0 +1,46 @@
+{
+  "shopName": "LOONG JOKE Coffee Tea Soda",
+  "currency": "THB",
+  "openHours": { "open": "09:00", "close": "16:00" },
+  "sweetnessLevels": [
+    { "id": "none", "name": "ไม่หวาน" },
+    { "id": "less", "name": "หวานน้อย" },
+    { "id": "normal", "name": "ปกติ", "default": true },
+    { "id": "extra", "name": "หวานมาก" }
+  ],
+  "categories": [
+    { "id": "coffee", "name": "Ice Coffee" },
+    { "id": "non-coffee", "name": "Non Coffee" },
+    { "id": "soda", "name": "Soda" }
+  ],
+  "items": [
+    { "id": "americano", "name": "Americano", "nameTh": "อเมริกาโน", "category": "coffee", "price": 50, "image": "", "available": true },
+    { "id": "coconut-americano", "name": "Coconut Americano", "nameTh": "อเมริกาโนน้ำมะพร้าว", "category": "coffee", "price": 65, "image": "", "available": true },
+    { "id": "orange-americano", "name": "Orange Americano", "nameTh": "อเมริกาโนส้ม", "category": "coffee", "price": 65, "image": "", "available": true },
+    { "id": "mocha", "name": "Mocha", "nameTh": "มอคค่า", "category": "coffee", "price": 65, "image": "Photo/menu/Mocha.jpg", "available": true },
+    { "id": "coffee-matcha-latte", "name": "Coffee Matcha Latte", "nameTh": "กาแฟมัทฉะลาเต้", "category": "coffee", "price": 70, "image": "", "available": true },
+    { "id": "cappuccino", "name": "Cappuccino", "nameTh": "คาปูชิโน่", "category": "coffee", "price": 60, "image": "Photo/menu/Cappuccino.jpg", "available": true },
+    { "id": "latte", "name": "Latte", "nameTh": "ลาเต้", "category": "coffee", "price": 60, "image": "Photo/menu/Latte.jpg", "available": true },
+    { "id": "caramel-latte", "name": "Caramel Latte", "nameTh": "ลาเต้คาราเมล", "category": "coffee", "price": 60, "image": "", "available": true },
+    { "id": "espresso", "name": "Espresso", "nameTh": "เอสเปรสโซ่", "category": "coffee", "price": 60, "image": "Photo/menu/Espresso.jpg", "available": true },
+
+    { "id": "pure-matcha", "name": "Pure Matcha", "nameTh": "มัทฉะ", "category": "non-coffee", "price": 60, "image": "", "available": true },
+    { "id": "matcha-latte", "name": "Matcha Latte", "nameTh": "มัทฉะลาเต้", "category": "non-coffee", "price": 65, "image": "Photo/menu/Matcha Latte.jpg", "available": true },
+    { "id": "mint-cocoa", "name": "Mint Cocoa", "nameTh": "โกโก้มิ้นต์", "category": "non-coffee", "price": 60, "image": "", "available": true },
+    { "id": "green-tea", "name": "Green Tea", "nameTh": "ชาเขียว", "category": "non-coffee", "price": 50, "image": "Photo/menu/Green Tea.jpg", "available": true },
+    { "id": "peach-tea", "name": "Peach Tea", "nameTh": "ชาพีช", "category": "non-coffee", "price": 50, "image": "Photo/menu/Peach Tea.jpg", "available": true },
+    { "id": "pink-milk", "name": "Pink Milk", "nameTh": "นมชมพู", "category": "non-coffee", "price": 50, "image": "Photo/menu/Pink milk.jpg", "available": true },
+    { "id": "thai-tea", "name": "Thai Tea", "nameTh": "ชาไทย", "category": "non-coffee", "price": 50, "image": "Photo/menu/Thai Tea.jpg", "available": true },
+    { "id": "cocoa", "name": "Cocoa", "nameTh": "โกโก้", "category": "non-coffee", "price": 55, "image": "Photo/menu/Cocoa.jpg", "available": true },
+    { "id": "caramel-milk", "name": "Caramel Fresh Milk", "nameTh": "นมสดคาราเมล", "category": "non-coffee", "price": 55, "image": "", "available": true },
+
+    { "id": "red-lime-soda", "name": "Red Lime Soda", "nameTh": "แดงมะนาวโซดา", "category": "soda", "price": 50, "image": "", "available": true },
+    { "id": "lime-soda", "name": "Lime Soda", "nameTh": "มะนาวโซดา", "category": "soda", "price": 50, "image": "", "available": true },
+    { "id": "red-soda", "name": "Red Soda", "nameTh": "แดงโซดา", "category": "soda", "price": 50, "image": "", "available": true },
+    { "id": "strawberry-soda", "name": "Strawberry Soda", "nameTh": "สตรอว์เบอร์รี่โซดา", "category": "soda", "price": 50, "image": "", "available": true },
+    { "id": "blue-hawaii-soda", "name": "Blue Hawaii Soda", "nameTh": "บลูฮาวายโซดา", "category": "soda", "price": 50, "image": "", "available": true },
+    { "id": "cream-soda", "name": "Cream Soda", "nameTh": "ครีมโซดา", "category": "soda", "price": 50, "image": "", "available": true },
+    { "id": "plum-soda", "name": "Plum Soda", "nameTh": "บ๊วยโซดา", "category": "soda", "price": 50, "image": "Photo/menu/Plum Soda.jpg", "available": true },
+    { "id": "peach-soda", "name": "Peach Soda", "nameTh": "พีชโซดา", "category": "soda", "price": 50, "image": "", "available": true }
+  ]
+}

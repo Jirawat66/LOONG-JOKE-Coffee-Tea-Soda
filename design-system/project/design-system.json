@@ -1,0 +1,47 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": { "v": 1, "at": "2026-11-03T02:37:15Z" },
+  "title": "LOONG JOKE",
+  "namespace": "LoongJoke",
+  "libraries": [
+    { "name": "react", "version": "18" },
+    { "name": "react-dom", "version": "18" }
+  ],
+  "sections": {},
+  "groups": ["Logos", "Photos", "Reference"],
+  "assetGroups": {
+    "Logos": {
+      "name": "Logos",
+      "tile": "l",
+      "order": ["loong-joke-logo.jpg"],
+      "files": {
+        "loong-joke-logo.jpg": { "name": "loong-joke-logo.jpg", "blob": "ae68a21b9ae0d3cb6897fd017d8456b7", "size": 139415, "type": "image/jpeg" }
+      }
+    },
+    "Photos": {
+      "name": "Photos",
+      "tile": "m",
+      "order": ["thai-tea.jpg"],
+      "files": {
+        "thai-tea.jpg": { "name": "thai-tea.jpg", "blob": "1540d91ba232d64ae4c016e42101e0fd", "size": 97425, "type": "image/jpeg" }
+      }
+    },
+    "Reference": {
+      "name": "Reference",
+      "tile": "l",
+      "order": ["menu-board.jpg"],
+      "files": {
+        "menu-board.jpg": { "name": "menu-board.jpg", "blob": "270aaa166b99c56e2bd53f5c4dd1352a", "size": 199208, "type": "image/jpeg" }
+      }
+    }
+  },
+  "blobs": {},
+  "docs": { "readme": "project/README.md", "sections": [] },
+  "lastChange": {
+    "by": "Claude",
+    "at": "2026-11-03T02:45:00Z",
+    "via": "Claude Code",
+    "note": "First version, built from the printed menu board and the logo."
+  }
+}
