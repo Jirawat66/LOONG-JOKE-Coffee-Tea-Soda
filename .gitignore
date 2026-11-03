@@ -2,6 +2,9 @@
 .firebase/
 *-debug.log
 
+# Private notes kept on this computer only
+.private/
+
 # Claude Code local settings
 .claude/
 
