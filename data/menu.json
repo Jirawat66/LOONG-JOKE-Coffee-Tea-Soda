@@ -1,7 +1,6 @@
 {
   "shopName": "LOONG JOKE Coffee Tea Soda",
   "currency": "THB",
-  "openHours": { "open": "09:00", "close": "16:00" },
   "sweetnessLevels": [
     { "id": "none", "name": "ไม่หวาน" },
     { "id": "less", "name": "หวานน้อย" },

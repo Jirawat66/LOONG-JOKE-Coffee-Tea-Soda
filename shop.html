@@ -39,6 +39,17 @@
   </section>
 
   <div class="shop-app" id="app" hidden>
+    <div class="shop-wrap">
+      <section class="open-bar" id="open-bar" aria-label="สถานะร้าน">
+        <p class="open-state" role="status">
+          <span class="open-dot" aria-hidden="true"></span>
+          <span><strong id="open-title">กำลังโหลดสถานะร้าน…</strong> <span class="open-sub" id="open-sub"></span></span>
+        </p>
+        <button type="button" class="lj-btn lj-btn-primary open-toggle" id="open-toggle" disabled>เปิดรับออเดอร์</button>
+        <p class="error open-error" id="open-error" role="alert" hidden>บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง</p>
+      </section>
+    </div>
+
     <button type="button" class="sound-banner shop-wrap" id="sound-banner" hidden>แตะตรงนี้เพื่อเปิดเสียงแจ้งเตือนออเดอร์ใหม่</button>
 
     <nav class="tabs shop-tabs" aria-label="หน้าร้าน">

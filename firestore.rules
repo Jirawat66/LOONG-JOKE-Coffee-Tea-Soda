@@ -1,8 +1,8 @@
 rules_version = '2';
 
 // กฎความปลอดภัยของฐานข้อมูล
-// ลูกค้า: ส่งออเดอร์ใหม่ได้ (เฉพาะเวลาร้านเปิด) และดูออเดอร์ที่ตัวเองรู้รหัสได้
-// หน้าร้าน (บัญชี shop@loongjoke.app): ดูออเดอร์ทั้งหมด เปลี่ยนสถานะ และกดเมนูหมด
+// ลูกค้า: ส่งออเดอร์ใหม่ได้ (เฉพาะตอนร้านกดเปิดรับออเดอร์) และดูออเดอร์ที่ตัวเองรู้รหัสได้
+// หน้าร้าน (บัญชี shop@loongjoke.app): ดูออเดอร์ทั้งหมด เปลี่ยนสถานะ กดเมนูหมด และกดเปิด/ปิดร้าน
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -10,9 +10,10 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.email == 'shop@loongjoke.app';
     }
 
-    // ร้านเปิด 09:00-16:00 เวลาไทย = 02:00-09:00 เวลา UTC
+    // หน้าร้านไม่ได้กดปิดรับออเดอร์ (settings/shop.open != false) ยังไม่เคยกด = เปิด
     function isOpen() {
-      return request.time.hours() >= 2 && request.time.hours() < 9;
+      let shop = /databases/$(database)/documents/settings/shop;
+      return !exists(shop) || get(shop).data.open != false;
     }
 
     function isValidNewOrder(d) {
@@ -38,6 +39,14 @@ service cloud.firestore {
     match /settings/soldOut {
       allow read: if true;
       allow write: if isShop();
+    }
+
+    match /settings/shop {
+      allow read: if true;
+      allow write: if isShop()
+        && request.resource.data.keys().hasOnly(['open', 'updatedAt'])
+        && request.resource.data.open is bool
+        && request.resource.data.updatedAt == request.time;
     }
   }
 }

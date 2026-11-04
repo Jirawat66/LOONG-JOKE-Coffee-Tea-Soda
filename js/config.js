@@ -21,9 +21,6 @@ export const SHOP_EMAIL = 'shop@loongjoke.app';
 // ถ้าเปลี่ยน ต้องแก้ใน firestore.rules ด้วย
 export const TABLE_COUNT = 10;
 
-// ปิดรับออเดอร์นอกเวลาเปิดร้าน (เวลาอยู่ใน data/menu.json และใน firestore.rules)
-export const ENFORCE_OPEN_HOURS = true;
-
 // ใส่ ?demo=1 ต่อท้ายลิงก์เพื่อทดลองโดยไม่ส่งข้อมูลไป Firebase
 // โหมดทดลองเก็บข้อมูลไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น
 export const DEMO_MODE = new URLSearchParams(location.search).has('demo');

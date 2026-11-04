@@ -18,6 +18,7 @@ const auth = getAuth(app);
 
 const orders = collection(db, 'orders');
 const soldOutDoc = doc(db, 'settings', 'soldOut');
+const shopDoc = doc(db, 'settings', 'shop');
 
 // เวลาที่เซิร์ฟเวอร์ยังไม่ตอบกลับ ใช้เวลาประมาณจากเครื่องไปก่อน
 const SNAPSHOT_OPTIONS = { serverTimestamps: 'estimate' };
@@ -84,6 +85,15 @@ export function watchSoldOut(callback) {
 
 export async function setSoldOut(itemId, soldOut) {
   await setDoc(soldOutDoc, { ids: soldOut ? arrayUnion(itemId) : arrayRemove(itemId) }, { merge: true });
+}
+
+// ร้านเปิดรับออเดอร์อยู่ไหม (หน้าร้านกดเปิด/ปิดเอง) ยังไม่เคยกด = เปิด ตรงกับ firestore.rules
+export function watchShopOpen(callback) {
+  return onSnapshot(shopDoc, (snap) => callback(snap.data()?.open !== false), logError('watchShopOpen'));
+}
+
+export async function setShopOpen(open) {
+  await setDoc(shopDoc, { open, updatedAt: serverTimestamp() });
 }
 
 export async function signIn(password) {

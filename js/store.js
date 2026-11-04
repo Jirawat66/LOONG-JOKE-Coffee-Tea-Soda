@@ -11,6 +11,7 @@ export const DEMO_PASSWORD = 'demo1234';
 
 const ORDERS_KEY = 'lj-demo-orders';
 const SOLD_OUT_KEY = 'lj-demo-soldout';
+const OPEN_KEY = 'lj-demo-open';
 const AUTH_KEY = 'lj-demo-shop';
 const listeners = new Set();
 
@@ -34,7 +35,7 @@ function write(key, value) {
 
 // แท็บอื่นแก้ข้อมูล (เช่น หน้าร้านกด "กำลังทำ") ให้หน้านี้อัปเดตตาม
 window.addEventListener('storage', (e) => {
-  if ([ORDERS_KEY, SOLD_OUT_KEY, AUTH_KEY].includes(e.key)) listeners.forEach((fn) => fn());
+  if ([ORDERS_KEY, SOLD_OUT_KEY, OPEN_KEY, AUTH_KEY].includes(e.key)) listeners.forEach((fn) => fn());
 });
 
 function subscribe(fn) {
@@ -89,6 +90,15 @@ const demo = {
     if (soldOut) ids.add(itemId);
     else ids.delete(itemId);
     write(SOLD_OUT_KEY, [...ids]);
+  },
+
+  // ร้านเปิดรับออเดอร์อยู่ไหม (หน้าร้านกดเปิด/ปิดเอง) ยังไม่เคยกด = เปิด
+  watchShopOpen(callback) {
+    return subscribe(() => callback(read(OPEN_KEY, true) !== false));
+  },
+
+  async setShopOpen(open) {
+    write(OPEN_KEY, open);
   },
 
   async signIn(password) {

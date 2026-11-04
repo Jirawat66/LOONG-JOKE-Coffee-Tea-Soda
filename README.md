@@ -21,7 +21,7 @@
 | `js/qr.js` | สร้างและพิมพ์ QR โต๊ะ |
 | `js/store.js`, `js/store-firebase.js` | การเก็บข้อมูล (โหมดทดลอง / Firebase) |
 | `js/config.js` | ค่าตั้งค่า: จำนวนโต๊ะ, ลิงก์เว็บ, บัญชีหน้าร้าน |
-| `data/menu.json` | เมนู ราคา ระดับความหวาน และเวลาเปิดร้าน |
+| `data/menu.json` | เมนู ราคา และระดับความหวาน |
 | `css/` | สีและคอมโพเนนต์จาก design system |
 | `Photo/` | โลโก้และรูปเมนู |
 | `design-system/project/` | design system ต้นฉบับ (ไม่ได้ขึ้นเว็บ) |
@@ -34,14 +34,13 @@
 
 | แก้อะไร | ไฟล์ | คำสั่ง deploy |
 |---|---|---|
-| เมนู ราคา เวลาเปิดร้าน | `data/menu.json` | `firebase deploy --only hosting` |
+| เมนู ราคา | `data/menu.json` | `firebase deploy --only hosting` |
 | หน้าเว็บ | `*.html`, `js/`, `css/` | `firebase deploy --only hosting` |
 | กฎความปลอดภัย | `firestore.rules` | `firebase deploy --only firestore:rules` |
 | ดัชนีฐานข้อมูล | `firestore.indexes.json` | `firebase deploy --only firestore:indexes` |
 
-ค่าที่ต้องแก้ให้ตรงกันสองที่:
+**จำนวนโต๊ะ** ต้องแก้ให้ตรงกันสองที่: `TABLE_COUNT` ใน `js/config.js` และ `d.table <= 10` ใน `firestore.rules`
 
-- **จำนวนโต๊ะ:** `TABLE_COUNT` ใน `js/config.js` และ `d.table <= 10` ใน `firestore.rules`
-- **เวลาเปิดร้าน:** `openHours` ใน `data/menu.json` และ `isOpen()` ใน `firestore.rules` (เวลา UTC = เวลาไทย − 7 ชั่วโมง)
+เปิด/ปิดรับออเดอร์ไม่ต้องแก้โค้ด พนักงานกดปุ่มที่หน้าร้านได้เลย
 
 รหัสหน้าร้านตั้งและเปลี่ยนใน Firebase Console → Authentication เท่านั้น ห้ามใส่ไว้ในโค้ด

@@ -1,5 +1,5 @@
 // หน้าเมนูของลูกค้า: index.html?table=5
-import { TABLE_COUNT, ENFORCE_OPEN_HOURS } from './config.js';
+import { TABLE_COUNT } from './config.js';
 import { store, isDemo } from './store.js';
 import { shopTime } from './time.js';
 import { $, el, baht, photoUrl } from './dom.js';
@@ -29,12 +29,6 @@ function writeSession(key, value) {
   }
 }
 
-function isOpenNow(hours, now = new Date()) {
-  if (!ENFORCE_OPEN_HOURS || !hours) return true;
-  const hhmm = shopTime(now);
-  return hhmm >= hours.open && hhmm < hours.close;
-}
-
 // ---------- state ----------
 const tableParam = Number(new URLSearchParams(location.search).get('table'));
 const table = Number.isInteger(tableParam) && tableParam >= 1 && tableParam <= TABLE_COUNT ? tableParam : null;
@@ -44,12 +38,18 @@ const ORDERS_KEY = `lj-my-orders-${isDemo ? 'demo-' : ''}${table}`;
 let menu = null;
 let itemsById = new Map();
 let soldOut = new Set();
+let shopOpen = null; // null = ยังโหลดไม่เสร็จ, หน้าร้านกดเปิด/ปิดเอง
 let cart = readSession(CART_KEY, []);
 let current = null; // { item, sweetness, qty }
 const orderViews = new Map();
 
 function canOrder() {
-  return table !== null && isOpenNow(menu.openHours);
+  return table !== null && shopOpen === true;
+}
+
+// ข้อความ "ตอนนี้ยังสั่งไม่ได้" ตามสาเหตุ
+function blockedText() {
+  return shopOpen === null ? 'กำลังโหลด…' : 'ร้านปิดรับออเดอร์อยู่';
 }
 
 function sweetnessName(id) {
@@ -155,7 +155,7 @@ function renderItemQty() {
   $('qty-plus').disabled = current.qty >= MAX_QTY;
   const add = $('add-to-cart');
   add.disabled = !canOrder();
-  add.textContent = canOrder() ? `เพิ่มลงตะกร้า · ${baht(current.item.price * current.qty)}` : 'ตอนนี้ยังสั่งไม่ได้';
+  add.textContent = canOrder() ? `เพิ่มลงตะกร้า · ${baht(current.item.price * current.qty)}` : blockedText();
 }
 
 $('qty-minus').addEventListener('click', () => { current.qty = Math.max(1, current.qty - 1); renderItemQty(); });
@@ -223,7 +223,7 @@ function renderCart() {
   $('cart-total').textContent = baht(cartTotal());
   const place = $('place-order');
   place.disabled = !cart.length || !canOrder();
-  place.textContent = canOrder() ? 'สั่งเลย' : 'ตอนนี้ยังสั่งไม่ได้';
+  place.textContent = canOrder() ? 'สั่งเลย' : blockedText();
 }
 
 $('open-cart').addEventListener('click', () => {
@@ -233,7 +233,7 @@ $('open-cart').addEventListener('click', () => {
 
 $('place-order').addEventListener('click', async () => {
   const showError = (msg) => { $('cart-error').textContent = msg; $('cart-error').hidden = false; };
-  if (!canOrder()) return showError('ร้านปิดรับออเดอร์แล้ว');
+  if (!canOrder()) return showError('ร้านปิดรับออเดอร์อยู่ ลองใหม่เมื่อร้านเปิด');
   const out = cart.filter((l) => isSoldOut(l.id));
   if (out.length) return showError(`${out.map((l) => itemsById.get(l.id).name).join(', ')} หมดแล้ว ลบออกจากตะกร้าก่อนสั่ง`);
 
@@ -255,9 +255,11 @@ $('place-order').addEventListener('click', async () => {
     $('my-orders').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     console.error(err);
-    showError('ส่งออเดอร์ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง');
-    button.disabled = false;
-    button.textContent = 'สั่งเลย';
+    renderCart();
+    // ร้านเพิ่งกดปิดรับออเดอร์ ฐานข้อมูลจึงไม่รับ
+    showError(err.code === 'permission-denied'
+      ? 'ร้านเพิ่งปิดรับออเดอร์ สอบถามพนักงานได้'
+      : 'ส่งออเดอร์ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง');
   }
 });
 
@@ -294,9 +296,24 @@ function watchMyOrder(id) {
 }
 
 // ---------- start ----------
-function showNotice(html) {
-  $('notice').innerHTML = html;
-  $('notice').hidden = false;
+function renderNotice() {
+  const notice = $('notice');
+  if (table === null) {
+    notice.innerHTML = '<strong>ไม่พบเลขโต๊ะ</strong> สแกน QR code บนโต๊ะอีกครั้งเพื่อสั่งเครื่องดื่ม';
+  } else if (shopOpen === false) {
+    notice.innerHTML = '<strong>ตอนนี้ร้านปิดรับออเดอร์</strong> ดูเมนูได้ก่อน สั่งได้เมื่อร้านเปิดรับออเดอร์';
+  } else {
+    notice.hidden = true;
+    return;
+  }
+  notice.hidden = false;
+}
+
+// หน้าร้านกดเปิด/ปิด: อัปเดตปุ่มที่เปิดอยู่ทันที
+function applyShopOpen() {
+  renderNotice();
+  if ($('item-sheet').open) renderItemQty();
+  if ($('cart-sheet').open) renderCart();
 }
 
 async function start() {
@@ -315,15 +332,14 @@ async function start() {
   }
   itemsById = new Map(menu.items.map((i) => [i.id, i]));
 
-  if (table === null) {
-    showNotice('<strong>ไม่พบเลขโต๊ะ</strong> สแกน QR code บนโต๊ะอีกครั้งเพื่อสั่งเครื่องดื่ม');
-  } else if (!isOpenNow(menu.openHours)) {
-    showNotice(`<strong>ตอนนี้ร้านปิดรับออเดอร์</strong> ร้านเปิด ${menu.openHours.open}–${menu.openHours.close} น.`);
-  } else if (isDemo) {
-    console.info('LOONG JOKE: demo mode, orders are stored in this browser only.');
-  }
+  renderNotice();
+  if (isDemo) console.info('LOONG JOKE: demo mode, orders are stored in this browser only.');
 
   renderMenu();
+  store.watchShopOpen((open) => {
+    shopOpen = open;
+    applyShopOpen();
+  });
   store.watchSoldOut((ids) => {
     soldOut = ids;
     applySoldOut();

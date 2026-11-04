@@ -22,6 +22,9 @@ const failed = new Set();
 let soldOut = new Set();
 let unsubOrders = null;
 let unsubSoldOut = null;
+let unsubOpen = null;
+let shopOpen = null; // null = ยังโหลดไม่เสร็จ
+let openBusy = false;
 let started = false;
 
 // ---------- เสียงแจ้งเตือน ----------
@@ -135,6 +138,10 @@ function showApp() {
     soldOut = ids;
     renderStock();
   });
+  unsubOpen = store.watchShopOpen((open) => {
+    shopOpen = open;
+    renderOpen();
+  });
 }
 
 function stopApp() {
@@ -143,7 +150,10 @@ function stopApp() {
   showTab('orders');
   unsubOrders?.();
   unsubSoldOut?.();
-  unsubOrders = unsubSoldOut = null;
+  unsubOpen?.();
+  unsubOrders = unsubSoldOut = unsubOpen = null;
+  shopOpen = null;
+  renderOpen();
   wakeLock?.release().catch(() => {});
 }
 
@@ -262,6 +272,41 @@ function renderTicket(order) {
     el('div', { class: 'ticket-actions' }, actions)
   );
 }
+
+// ---------- เปิด/ปิดรับออเดอร์ ----------
+function renderOpen() {
+  const bar = $('open-bar');
+  const button = $('open-toggle');
+  if (shopOpen === null) {
+    bar.removeAttribute('data-open');
+    $('open-title').textContent = 'กำลังโหลดสถานะร้าน…';
+    $('open-sub').textContent = '';
+    button.disabled = true;
+    return;
+  }
+  bar.dataset.open = String(shopOpen);
+  $('open-title').textContent = shopOpen ? 'เปิดรับออเดอร์อยู่' : 'ปิดรับออเดอร์อยู่';
+  $('open-sub').textContent = shopOpen ? 'ลูกค้าสแกน QR แล้วสั่งได้' : 'ลูกค้าดูเมนูได้ แต่ยังสั่งไม่ได้';
+  button.className = `lj-btn ${shopOpen ? 'lj-btn-secondary' : 'lj-btn-primary'} open-toggle`;
+  button.textContent = openBusy ? 'กำลังบันทึก…' : shopOpen ? 'ปิดรับออเดอร์' : 'เปิดรับออเดอร์';
+  button.disabled = openBusy;
+}
+
+$('open-toggle').addEventListener('click', async () => {
+  if (shopOpen === null || openBusy) return;
+  openBusy = true;
+  $('open-error').hidden = true;
+  renderOpen();
+  try {
+    await store.setShopOpen(!shopOpen);
+  } catch (err) {
+    console.error(err);
+    $('open-error').hidden = false;
+  } finally {
+    openBusy = false;
+    renderOpen();
+  }
+});
 
 // ---------- เมนูหมด ----------
 let stockError = false;
