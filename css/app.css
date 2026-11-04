@@ -52,7 +52,9 @@ h1, h2, h3 { text-wrap: balance; }
 .notice strong { color: var(--brick); }
 
 .tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: var(--space-2); overflow-x: auto; background: var(--surface); padding: var(--space-8) max(16px, env(safe-area-inset-right, 0px)) var(--space-3) max(16px, env(safe-area-inset-left, 0px)); max-width: 592px; margin: 0 auto; scrollbar-width: none; }
-.notice:not([hidden]) + .tabs { padding-top: var(--space-4); }
+.notice:not([hidden]) + .tabs,
+.notice:not([hidden]) + .my-orders[hidden] + .tabs { padding-top: var(--space-4); }
+.notice:not([hidden]) + .my-orders .section-title { margin-top: var(--space-6); }
 .tab { flex: none; font: inherit; font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brick); text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); border: var(--stroke-mid) solid var(--brick); background: var(--surface); }
 .tab[aria-current="true"] { background: var(--brick); color: var(--on-brick); }
 

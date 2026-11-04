@@ -7,7 +7,7 @@ import { $, el, baht, photoUrl } from './dom.js';
 const MAX_QTY = 20;
 const STATUS_TEXT = {
   new: { badge: 'ใหม่', msg: 'ส่งถึงร้านแล้ว รอสักครู่นะ' },
-  making: { badge: 'กำลังทำ', msg: 'ร้านกำลังทำเครื่องดื่มให้' },
+  making: { badge: 'กำลังทำ', msg: '' },
   done: { badge: 'เสร็จแล้ว', msg: 'เสิร์ฟแล้ว ชำระเงินที่เคาน์เตอร์ได้เลย' },
   cancelled: { badge: 'ยกเลิก', msg: 'ร้านยกเลิกออเดอร์นี้ สอบถามพนักงานได้' }
 };
@@ -278,12 +278,12 @@ function watchMyOrder(id) {
     }
     const s = STATUS_TEXT[order.status] ?? STATUS_TEXT.new;
     const time = shopTime(new Date(order.createdAt));
-    li.replaceChildren(
+    li.replaceChildren(...[
       el('div', { class: 'order-head' },
         el('span', { class: `lj-badge lj-badge-${order.status}`, text: s.badge }),
         el('span', { class: 'order-time', text: `สั่งเมื่อ ${time} น.` })
       ),
-      el('p', { class: 'order-msg', text: s.msg }),
+      s.msg ? el('p', { class: 'order-msg', text: s.msg }) : null,
       el('ul', { class: 'order-lines' },
         order.items.map((i) => el('li', {},
           el('span', { text: `${i.name} · ${i.sweetnessName} × ${i.qty}${i.note ? ` (${i.note})` : ''}` }),
@@ -291,7 +291,7 @@ function watchMyOrder(id) {
         )),
         el('li', {}, el('strong', { text: 'รวม' }), el('strong', { text: baht(order.total) }))
       )
-    );
+    ].filter(Boolean));
   });
 }
 
