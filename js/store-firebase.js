@@ -11,6 +11,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import { FIREBASE_CONFIG, SHOP_EMAIL } from './config.js';
 import { dayStart, nextDay } from './time.js';
+import { cleanOrder } from './order-data.js';
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
@@ -25,12 +26,12 @@ const SNAPSHOT_OPTIONS = { serverTimestamps: 'estimate' };
 
 function toOrder(snap) {
   const data = snap.data(SNAPSHOT_OPTIONS);
-  return {
+  return cleanOrder({
     id: snap.id,
     ...data,
-    createdAt: data.createdAt?.toMillis() ?? Date.now(),
-    updatedAt: data.updatedAt?.toMillis() ?? Date.now()
-  };
+    createdAt: data.createdAt?.toMillis?.() ?? Date.now(),
+    updatedAt: data.updatedAt?.toMillis?.() ?? Date.now()
+  });
 }
 
 function logError(what) {

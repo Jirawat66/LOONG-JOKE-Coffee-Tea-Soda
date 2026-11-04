@@ -3,6 +3,7 @@
 // โหมดทดลอง (?demo=1): เก็บใน localStorage และอัปเดตข้ามแท็บในเบราว์เซอร์เดียวกัน
 import { DEMO_MODE } from './config.js';
 import { dayKey } from './time.js';
+import { cleanOrder } from './order-data.js';
 
 export const isDemo = DEMO_MODE;
 
@@ -38,6 +39,11 @@ window.addEventListener('storage', (e) => {
   if ([ORDERS_KEY, SOLD_OUT_KEY, OPEN_KEY, AUTH_KEY].includes(e.key)) listeners.forEach((fn) => fn());
 });
 
+// ออเดอร์สำหรับแสดงผล (ทำความสะอาดข้อมูลเหมือนโหมดจริง)
+function readOrders() {
+  return read(ORDERS_KEY, []).map(cleanOrder);
+}
+
 function subscribe(fn) {
   listeners.add(fn);
   fn();
@@ -54,12 +60,12 @@ const demo = {
   },
 
   watchOrder(id, callback) {
-    return subscribe(() => callback(read(ORDERS_KEY, []).find((o) => o.id === id) || null));
+    return subscribe(() => callback(readOrders().find((o) => o.id === id) || null));
   },
 
   // ออเดอร์ตั้งแต่วัน fromDay ถึง toDay (YYYY-MM-DD รวมทั้งสองวัน) เรียงตามเวลาสั่ง
   watchOrders(fromDay, toDay, callback) {
-    return subscribe(() => callback(read(ORDERS_KEY, [])
+    return subscribe(() => callback(readOrders()
       .filter((o) => {
         const day = dayKey(new Date(o.createdAt));
         return day >= fromDay && day <= toDay;
@@ -69,7 +75,7 @@ const demo = {
 
   // ออเดอร์ของวันก่อน beforeDay ที่ยังไม่ได้กด "เสร็จแล้ว" หรือ "ยกเลิก"
   watchUnfinishedBefore(beforeDay, callback) {
-    return subscribe(() => callback(read(ORDERS_KEY, [])
+    return subscribe(() => callback(readOrders()
       .filter((o) => (o.status === 'new' || o.status === 'making') && dayKey(new Date(o.createdAt)) < beforeDay)
       .sort((a, b) => a.createdAt - b.createdAt)));
   },
@@ -89,7 +95,7 @@ const demo = {
   // ยอดขายรวมของออเดอร์ที่เสร็จแล้ว ตั้งแต่วัน from ถึงก่อนวัน until (YYYY-MM-DD)
   // ไม่ใส่ from/until = ตั้งแต่เริ่มใช้ระบบ
   async salesTotal({ from, until } = {}) {
-    const done = read(ORDERS_KEY, []).filter((o) => {
+    const done = readOrders().filter((o) => {
       const day = dayKey(new Date(o.createdAt));
       return o.status === 'done' && (!from || day >= from) && (!until || day < until);
     });

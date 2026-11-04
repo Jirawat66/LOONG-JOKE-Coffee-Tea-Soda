@@ -20,6 +20,7 @@
 | `js/report.js`, `js/chart.js` | รายงานยอดขายและกราฟ |
 | `js/qr.js` | สร้างและพิมพ์ QR โต๊ะ |
 | `js/store.js`, `js/store-firebase.js` | การเก็บข้อมูล (โหมดทดลอง / Firebase) |
+| `js/order-data.js` | ทำความสะอาดข้อมูลออเดอร์ก่อนแสดงผล |
 | `js/config.js` | ค่าตั้งค่า: จำนวนโต๊ะ, ลิงก์เว็บ, บัญชีหน้าร้าน |
 | `data/menu.json` | เมนู ราคา และระดับความหวาน |
 | `css/` | สีและคอมโพเนนต์จาก design system |

@@ -12,6 +12,7 @@ const LOGIN_ERRORS = {
 };
 
 let menu = null;
+let menuById = null;
 let today = dayKey();
 let orders = [];
 let stale = []; // ออเดอร์ของวันก่อนที่ยังไม่ได้กดเสร็จหรือยกเลิก
@@ -275,12 +276,12 @@ function renderOrders() {
   for (const [lane, list] of Object.entries(lanes)) {
     $(`count-${lane}`).textContent = list.length;
     $(`lane-${lane}`).replaceChildren(...(list.length
-      ? list.map(renderTicket)
+      ? list.map((order) => renderTicket(order))
       : [el('li', { class: 'empty-lane', text: lane === 'new' ? 'ยังไม่มีออเดอร์ใหม่' : 'ไม่มีรายการ' })]));
   }
   $('stale').hidden = !stale.length;
   $('count-stale').textContent = stale.length;
-  $('lane-stale').replaceChildren(...stale.map((o) => renderTicket(o, true)));
+  $('lane-stale').replaceChildren(...stale.map((order) => renderTicket(order, { stale: true })));
 
   const waiting = lanes.new.length;
   $('orders-badge').hidden = !waiting;
@@ -288,8 +289,31 @@ function renderOrders() {
   document.title = `${waiting ? `(${waiting}) ` : ''}หน้าร้าน · LOONG JOKE`;
 }
 
-// isStale = ออเดอร์ค้างจากวันก่อน: แสดงวันที่ และกด "เสร็จแล้ว" ได้เลย
-function renderTicket(order, isStale = false) {
+// ---------- ตรวจราคากับเมนู ----------
+// ฐานข้อมูลตรวจราคาทีละแก้วไม่ได้ คนที่ส่งออเดอร์ตรงเข้าฐานข้อมูลจึงแก้ราคาเองได้
+// หน้าร้านเป็นที่เก็บเงิน จึงตรวจกับ data/menu.json ตรงนี้ (โหลดเมนูไม่ได้ = ไม่ตรวจ ไม่เตือนผิด)
+const MAX_QTY = 20; // ตรงกับหน้าลูกค้า
+const CHECK_WITH_CUSTOMER = 'ตรวจกับลูกค้าก่อนทำ ถ้าสงสัยให้กดยกเลิก';
+
+function priceProblem(order) {
+  if (!menuById) return null;
+  if (!order.items.length) return { title: 'รายการไม่ตรงกับเมนู', detail: CHECK_WITH_CUSTOMER };
+  let menuTotal = 0;
+  let pricesMatch = true;
+  for (const line of order.items) {
+    const item = menuById.get(line.id);
+    if (!item || line.name !== item.name) return { title: 'รายการไม่ตรงกับเมนู', detail: CHECK_WITH_CUSTOMER };
+    if (!Number.isInteger(line.qty) || line.qty < 1 || line.qty > MAX_QTY) return { title: 'จำนวนแก้วผิดปกติ', detail: CHECK_WITH_CUSTOMER };
+    if (line.price !== item.price) pricesMatch = false;
+    menuTotal += item.price * line.qty;
+  }
+  if (pricesMatch && order.total === menuTotal) return null;
+  return { title: 'ราคาไม่ตรงเมนู', detail: `เก็บเงินตามเมนู ${baht(menuTotal)} ถ้าสงสัยให้กดยกเลิก` };
+}
+
+// stale = ออเดอร์ค้างจากวันก่อน: แสดงวันที่ และกด "เสร็จแล้ว" ได้เลย
+// (รับเป็น object เพื่อไม่ให้ลำดับจาก list.map ถูกตีความเป็น stale)
+function renderTicket(order, { stale: isStale = false } = {}) {
   const isBusy = busy.has(order.id);
   const actions = [];
   const placed = new Date(order.createdAt);
@@ -320,7 +344,8 @@ function renderTicket(order, isStale = false) {
     );
   }
 
-  return el('li', { class: `ticket ticket-${order.status}` },
+  const problem = priceProblem(order);
+  return el('li', { class: `ticket ticket-${order.status}${problem ? ' ticket-flagged' : ''}` },
     el('div', { class: 'ticket-head' },
       el('span', { class: 'ticket-table', text: `โต๊ะ ${order.table}` }),
       el('span', { class: 'ticket-time' },
@@ -337,6 +362,7 @@ function renderTicket(order, isStale = false) {
           item.note ? el('span', { class: 'ticket-note', text: item.note }) : null)
       ))),
     el('div', { class: 'ticket-total' }, el('span', { text: 'รวม' }), el('span', { text: baht(order.total) })),
+    problem ? el('p', { class: 'ticket-warn' }, el('strong', { text: problem.title }), problem.detail) : null,
     failed.has(order.id) ? el('p', { class: 'error ticket-error', role: 'alert', text: 'บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง' }) : null,
     el('div', { class: 'ticket-actions' }, actions)
   );
@@ -435,6 +461,7 @@ async function start() {
   try {
     const res = await fetch('data/menu.json', { cache: 'no-store' });
     menu = await res.json();
+    menuById = new Map(menu.items.map((i) => [i.id, i]));
   } catch (err) {
     console.error(err);
   }

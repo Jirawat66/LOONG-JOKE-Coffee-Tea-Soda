@@ -81,6 +81,10 @@ body.shop { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0p
 .ticket-confirm { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; width: 100%; }
 .ticket-confirm p { margin: 0; flex: 1 1 100%; font-weight: 600; color: var(--brick-deep); }
 .ticket-error { margin: 0; font-size: 14px; }
+/* ราคา/รายการไม่ตรงกับเมนู */
+.ticket.ticket-flagged { border: var(--stroke-bold) solid var(--brick); opacity: 1; }
+.ticket-warn { margin: 0; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--brick); color: var(--on-brick); font-size: 14px; }
+.ticket-warn strong { display: block; font-size: 16px; }
 
 .stock-help { color: var(--ink-muted); margin: 0 0 var(--space-4); }
 .stock-cat { margin-bottom: var(--space-6); }
