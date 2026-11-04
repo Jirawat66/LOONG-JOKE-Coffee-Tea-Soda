@@ -311,6 +311,18 @@ function priceProblem(order) {
   return { title: 'ราคาไม่ตรงเมนู', detail: `เก็บเงินตามเมนู ${baht(menuTotal)} ถ้าสงสัยให้กดยกเลิก` };
 }
 
+// ไอคอนบนปุ่มเปลี่ยนสถานะ ให้แยกปุ่มได้ด้วยรูปร่าง ไม่ใช่สีอย่างเดียว (SVG คงที่ ไม่มีข้อมูลจากผู้ใช้)
+const ICONS = {
+  start: '<svg viewBox="0 0 16 16" width="16" height="16"><path d="M4.5 2.8v10.4L13 8z" fill="currentColor"/></svg>',
+  done: '<svg viewBox="0 0 16 16" width="16" height="16"><path d="M2.8 8.6l3.4 3.4 7-7.6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+function icon(name) {
+  const span = el('span', { class: 'btn-icon', 'aria-hidden': 'true' });
+  span.innerHTML = ICONS[name];
+  return span;
+}
+
 // stale = ออเดอร์ค้างจากวันก่อน: แสดงวันที่ และกด "เสร็จแล้ว" ได้เลย
 // (รับเป็น object เพื่อไม่ให้ลำดับจาก list.map ถูกตีความเป็น stale)
 function renderTicket(order, { stale: isStale = false } = {}) {
@@ -326,9 +338,13 @@ function renderTicket(order, { stale: isStale = false } = {}) {
       el('button', { type: 'button', class: 'lj-btn lj-btn-quiet', onclick: () => { confirming = null; renderOrders(); }, text: 'ไม่ใช่' })
     ));
   } else if (open) {
-    const next = order.status === 'new' && !isStale ? { status: 'making', label: 'เริ่มทำ' } : { status: 'done', label: 'เสร็จแล้ว' };
+    // ปุ่มใช้สีของสถานะถัดไป: เริ่มทำ = ส้ม (กำลังทำ), เสร็จแล้ว = เขียว (เสร็จแล้ว)
+    const next = order.status === 'new' && !isStale
+      ? { status: 'making', label: 'เริ่มทำ', variant: 'start' }
+      : { status: 'done', label: 'เสร็จแล้ว', variant: 'done' };
     actions.push(
-      el('button', { type: 'button', class: 'lj-btn lj-btn-primary', disabled: isBusy, onclick: () => changeStatus(order, next.status), text: isBusy ? 'กำลังบันทึก…' : next.label }),
+      el('button', { type: 'button', class: `lj-btn ticket-next ticket-next-${next.variant}`, disabled: isBusy, onclick: () => changeStatus(order, next.status) },
+        isBusy ? 'กำลังบันทึก…' : [icon(next.variant), next.label]),
       el('button', { type: 'button', class: 'lj-btn lj-btn-quiet', disabled: isBusy, onclick: () => { confirming = order.id; renderOrders(); }, text: 'ยกเลิก' })
     );
   } else {
