@@ -193,8 +193,20 @@ $('add-to-cart').addEventListener('click', () => {
 });
 
 // ---------- cart ----------
+const SLOW_SEND_MS = 8000;
+let sending = false; // กำลังส่งออเดอร์อยู่ (กันกดสั่งซ้ำ)
+
+function linesTotal(lines) {
+  return lines.reduce((sum, l) => sum + (itemsById.get(l.id)?.price ?? 0) * l.qty, 0);
+}
+
 function cartTotal() {
-  return cart.reduce((sum, l) => sum + (itemsById.get(l.id)?.price ?? 0) * l.qty, 0);
+  return linesTotal(cart);
+}
+
+function showCartError(msg) {
+  $('cart-error').textContent = msg;
+  $('cart-error').hidden = false;
 }
 
 function saveCart() {
@@ -214,7 +226,7 @@ function renderCartBar() {
 }
 
 function renderCart() {
-  $('cart-error').hidden = true;
+  if (!sending) $('cart-error').hidden = true;
   const list = $('cart-list');
   if (!cart.length) {
     list.replaceChildren(el('li', {}, el('p', { class: 'empty', text: 'ตะกร้ายังว่างอยู่' })));
@@ -231,19 +243,19 @@ function renderCart() {
         el('div', { class: 'cart-line-price', text: baht(item.price * line.qty) }),
         el('div', { class: 'cart-line-controls' },
           el('div', { class: 'lj-stepper', role: 'group', 'aria-label': `จำนวน ${item.name}` },
-            el('button', { type: 'button', class: 'lj-step-btn', 'aria-label': 'ลดจำนวน', disabled: line.qty <= 1, onclick: () => { line.qty -= 1; saveCart(); }, text: '−' }),
+            el('button', { type: 'button', class: 'lj-step-btn', 'aria-label': 'ลดจำนวน', disabled: sending || line.qty <= 1, onclick: () => { line.qty -= 1; saveCart(); }, text: '−' }),
             el('output', { class: 'lj-step-val', text: line.qty }),
-            el('button', { type: 'button', class: 'lj-step-btn', 'aria-label': 'เพิ่มจำนวน', disabled: line.qty >= MAX_QTY, onclick: () => { line.qty += 1; saveCart(); }, text: '+' })
+            el('button', { type: 'button', class: 'lj-step-btn', 'aria-label': 'เพิ่มจำนวน', disabled: sending || line.qty >= MAX_QTY, onclick: () => { line.qty += 1; saveCart(); }, text: '+' })
           ),
-          el('button', { type: 'button', class: 'link-btn', onclick: () => { line.qty = 0; saveCart(); }, text: 'ลบ' })
+          el('button', { type: 'button', class: 'link-btn', disabled: sending, onclick: () => { line.qty = 0; saveCart(); }, text: 'ลบ' })
         )
       );
     }));
   }
   $('cart-total').textContent = baht(cartTotal());
   const place = $('place-order');
-  place.disabled = !cart.length || !canOrder();
-  place.textContent = canOrder() ? 'สั่งเลย' : blockedText();
+  place.disabled = sending || !cart.length || !canOrder();
+  place.textContent = sending ? 'กำลังส่งออเดอร์…' : canOrder() ? 'สั่งเลย' : blockedText();
 }
 
 $('open-cart').addEventListener('click', () => {
@@ -252,33 +264,42 @@ $('open-cart').addEventListener('click', () => {
 });
 
 $('place-order').addEventListener('click', async () => {
-  const showError = (msg) => { $('cart-error').textContent = msg; $('cart-error').hidden = false; };
-  if (!canOrder()) return showError('ร้านปิดรับออเดอร์อยู่ ลองใหม่เมื่อร้านเปิด');
+  if (sending) return;
+  if (!canOrder()) return showCartError('ร้านปิดรับออเดอร์อยู่ ลองใหม่เมื่อร้านเปิด');
   const out = cart.filter((l) => isSoldOut(l.id));
-  if (out.length) return showError(`${out.map((l) => itemsById.get(l.id).name).join(', ')} หมดแล้ว ลบออกจากตะกร้าก่อนสั่ง`);
+  if (out.length) return showCartError(`${out.map((l) => itemsById.get(l.id).name).join(', ')} หมดแล้ว ลบออกจากตะกร้าก่อนสั่ง`);
+  // ไม่มีเน็ต: ไม่ส่ง ไม่อย่างนั้นออเดอร์จะค้างในเครื่อง แล้วไปถึงร้านทีหลังโดยลูกค้าไม่รู้ตัว
+  if (navigator.onLine === false) return showCartError('ไม่มีอินเทอร์เน็ต ตรวจสอบสัญญาณแล้วลองอีกครั้ง');
 
-  const button = $('place-order');
-  button.disabled = true;
-  button.textContent = 'กำลังส่งออเดอร์…';
+  const lines = [...cart];
+  sending = true;
+  renderCart();
+  // ส่งนานผิดปกติ: บอกว่ายังส่งอยู่ ระบบจะส่งต่อเองเมื่อสัญญาณกลับมา ถ้าปิดหน้าออเดอร์จะไม่ถึงร้าน
+  const slow = setTimeout(() => showCartError('สัญญาณอินเทอร์เน็ตอ่อน กำลังส่งออเดอร์อยู่ อย่าเพิ่งปิดหน้านี้'), SLOW_SEND_MS);
   try {
-    const items = cart.map((l) => {
+    const items = lines.map((l) => {
       const item = itemsById.get(l.id);
       return { id: item.id, name: item.name, nameTh: item.nameTh, price: item.price, sweetness: l.sweetness, sweetnessName: sweetnessName(l.sweetness), qty: l.qty, note: l.note };
     });
-    const id = await store.placeOrder({ table, items, total: cartTotal() });
+    const id = await store.placeOrder({ table, items, total: linesTotal(lines) });
     writeMyOrders([...readMyOrders(), { id, day: dayKey() }]);
-    cart = [];
+    sending = false;
+    // เอาออกเฉพาะรายการที่ส่งไปแล้ว ของที่เพิ่มลงตะกร้าระหว่างรอยังอยู่
+    cart = cart.filter((l) => !lines.includes(l));
     saveCart();
     $('cart-sheet').close();
     watchMyOrder(id);
     $('my-orders').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     console.error(err);
+    sending = false;
     renderCart();
     // ร้านเพิ่งกดปิดรับออเดอร์ ฐานข้อมูลจึงไม่รับ
-    showError(err.code === 'permission-denied'
+    showCartError(err.code === 'permission-denied'
       ? 'ร้านเพิ่งปิดรับออเดอร์ สอบถามพนักงานได้'
       : 'ส่งออเดอร์ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง');
+  } finally {
+    clearTimeout(slow);
   }
 });
 

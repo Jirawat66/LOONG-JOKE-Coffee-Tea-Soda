@@ -40,6 +40,7 @@
 
   <div class="shop-app" id="app" hidden>
     <div class="shop-wrap">
+      <p class="offline-bar" id="offline-bar" role="alert" hidden><strong>ขาดการเชื่อมต่ออินเทอร์เน็ต</strong> ออเดอร์ใหม่จะยังไม่ขึ้นจนกว่าจะต่อได้ ตรวจสอบ Wi-Fi หรือสัญญาณมือถือ</p>
       <section class="open-bar" id="open-bar" aria-label="สถานะร้าน">
         <p class="open-state" role="status">
           <span class="open-dot" aria-hidden="true"></span>
@@ -51,15 +52,24 @@
     </div>
 
     <button type="button" class="sound-banner shop-wrap" id="sound-banner" hidden>แตะตรงนี้เพื่อเปิดเสียงแจ้งเตือนออเดอร์ใหม่</button>
+    <div class="sound-ok shop-wrap" id="sound-ok" hidden>
+      <p class="sound-ok-text"><strong>เสียงแจ้งเตือนเปิดอยู่</strong> ถ้ากดทดสอบแล้วไม่ได้ยิน ให้เพิ่มเสียงและปิดโหมดเงียบของเครื่อง</p>
+      <button type="button" class="lj-btn lj-btn-secondary sound-test" id="sound-test">ทดสอบเสียง</button>
+    </div>
 
     <nav class="tabs shop-tabs" aria-label="หน้าร้าน">
-      <button type="button" class="tab" id="tab-orders" aria-current="true">ออเดอร์</button>
+      <button type="button" class="tab" id="tab-orders" aria-current="true">ออเดอร์ <span class="tab-badge" id="orders-badge" hidden><span class="sr-only">ใหม่ </span><span id="orders-badge-num">0</span></span></button>
       <button type="button" class="tab" id="tab-stock" aria-current="false">เมนูหมด</button>
       <button type="button" class="tab" id="tab-report" aria-current="false">ยอดขาย</button>
       <button type="button" class="tab" id="tab-qr" aria-current="false">QR โต๊ะ</button>
     </nav>
 
     <main class="shop-wrap" id="view-orders">
+      <section class="stale" id="stale" hidden aria-labelledby="stale-title">
+        <h2 class="lane-title" id="stale-title">ค้างจากวันก่อน <span class="count" id="count-stale">0</span></h2>
+        <p class="stale-help">ออเดอร์เหล่านี้ยังไม่ได้กด "เสร็จแล้ว" จึงยังไม่นับเป็นยอดขาย กด "เสร็จแล้ว" ถ้าเสิร์ฟและเก็บเงินแล้ว หรือ "ยกเลิก" ถ้าไม่ได้ขาย</p>
+        <ul class="tickets stale-list" id="lane-stale"></ul>
+      </section>
       <div class="board">
         <section class="lane" aria-labelledby="lane-new-title">
           <h2 class="lane-title" id="lane-new-title">ใหม่ <span class="count" id="count-new">0</span></h2>

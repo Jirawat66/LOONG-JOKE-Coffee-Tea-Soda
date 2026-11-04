@@ -67,6 +67,25 @@ const demo = {
       .sort((a, b) => a.createdAt - b.createdAt)));
   },
 
+  // ออเดอร์ของวันก่อน beforeDay ที่ยังไม่ได้กด "เสร็จแล้ว" หรือ "ยกเลิก"
+  watchUnfinishedBefore(beforeDay, callback) {
+    return subscribe(() => callback(read(ORDERS_KEY, [])
+      .filter((o) => (o.status === 'new' || o.status === 'making') && dayKey(new Date(o.createdAt)) < beforeDay)
+      .sort((a, b) => a.createdAt - b.createdAt)));
+  },
+
+  // โหมดทดลองไม่ได้ต่อฐานข้อมูล ใช้สถานะอินเทอร์เน็ตของเครื่องแทน
+  watchConnection(callback) {
+    const update = () => callback(navigator.onLine !== false);
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    update();
+    return () => {
+      window.removeEventListener('online', update);
+      window.removeEventListener('offline', update);
+    };
+  },
+
   // ยอดขายรวมของออเดอร์ที่เสร็จแล้ว ตั้งแต่วัน from ถึงก่อนวัน until (YYYY-MM-DD)
   // ไม่ใส่ from/until = ตั้งแต่เริ่มใช้ระบบ
   async salesTotal({ from, until } = {}) {

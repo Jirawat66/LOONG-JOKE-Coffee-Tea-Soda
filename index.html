@@ -65,7 +65,9 @@
         <input class="input" id="item-note" type="text" maxlength="60" placeholder="เช่น น้ำแข็งน้อย" autocomplete="off">
       </div>
 
-      <button type="button" class="lj-btn lj-btn-primary sheet-action" id="add-to-cart"></button>
+      <div class="sheet-footer">
+        <button type="button" class="lj-btn lj-btn-primary sheet-action" id="add-to-cart"></button>
+      </div>
     </form>
   </dialog>
 
@@ -79,8 +81,10 @@
         <span class="price" id="cart-total"></span>
       </div>
       <p class="pay-note">ชำระเงินที่เคาน์เตอร์ (เงินสด / พร้อมเพย์)</p>
-      <p class="error" id="cart-error" role="alert" hidden></p>
-      <button type="button" class="lj-btn lj-btn-primary sheet-action" id="place-order"></button>
+      <div class="sheet-footer">
+        <p class="error" id="cart-error" role="alert" hidden></p>
+        <button type="button" class="lj-btn lj-btn-primary sheet-action" id="place-order"></button>
+      </div>
     </form>
   </dialog>
 </body>

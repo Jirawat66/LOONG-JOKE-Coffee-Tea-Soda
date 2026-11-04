@@ -64,6 +64,22 @@ export function watchOrders(fromDay, toDay, callback) {
   return onSnapshot(q, (snap) => callback(snap.docs.map(toOrder)), logError('watchOrders'));
 }
 
+// ออเดอร์ของวันก่อน beforeDay ที่ยังไม่ได้กด "เสร็จแล้ว" หรือ "ยกเลิก" (ใช้ index status + createdAt)
+export function watchUnfinishedBefore(beforeDay, callback) {
+  const q = query(
+    orders,
+    where('status', 'in', ['new', 'making']),
+    where('createdAt', '<', Timestamp.fromDate(dayStart(beforeDay))),
+    orderBy('createdAt')
+  );
+  return onSnapshot(q, (snap) => callback(snap.docs.map(toOrder)), logError('watchUnfinishedBefore'));
+}
+
+// ต่อฐานข้อมูลได้อยู่ไหม: false = ขาดการเชื่อมต่อ ข้อมูลบนจออาจไม่ใช่ล่าสุด
+export function watchConnection(callback) {
+  return onSnapshot(shopDoc, { includeMetadataChanges: true }, (snap) => callback(!snap.metadata.fromCache), logError('watchConnection'));
+}
+
 // ยอดขายรวมของออเดอร์ที่เสร็จแล้ว ตั้งแต่วัน from ถึงก่อนวัน until (YYYY-MM-DD)
 // ให้เซิร์ฟเวอร์รวมให้ ไม่ต้องโหลดออเดอร์ทุกใบ (ใช้ index ใน firestore.indexes.json)
 export async function salesTotal({ from, until } = {}) {

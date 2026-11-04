@@ -1,6 +1,6 @@
 // หน้าร้าน: shop.html
 import { store, isDemo } from './store.js';
-import { dayKey, shopTime } from './time.js';
+import { dayKey, shopTime, thaiDate } from './time.js';
 import { $, el, baht } from './dom.js';
 import { createReport } from './report.js';
 import { createQrPanel } from './qr.js';
@@ -14,6 +14,7 @@ const LOGIN_ERRORS = {
 let menu = null;
 let today = dayKey();
 let orders = [];
+let stale = []; // ออเดอร์ของวันก่อนที่ยังไม่ได้กดเสร็จหรือยกเลิก
 let seen = new Set();
 let firstSnapshot = true;
 let confirming = null; // id ของออเดอร์ที่กำลังถามยืนยันยกเลิก
@@ -21,8 +22,12 @@ const busy = new Set();
 const failed = new Set();
 let soldOut = new Set();
 let unsubOrders = null;
+let unsubStale = null;
 let unsubSoldOut = null;
 let unsubOpen = null;
+let unsubConnection = null;
+let storeOnline = true;
+let offlineTimer = null;
 let shopOpen = null; // null = ยังโหลดไม่เสร็จ
 let openBusy = false;
 let started = false;
@@ -32,8 +37,12 @@ let audio = null;
 
 function ensureAudio() {
   try {
-    audio ??= new AudioContext();
-    if (audio.state === 'suspended') audio.resume();
+    if (!audio) {
+      audio = new AudioContext();
+      // เครื่องพักเสียงเองได้ (เช่น มีสายเข้า สลับแอป) ให้แถบ "แตะเพื่อเปิดเสียง" กลับมาเตือน
+      audio.addEventListener('statechange', updateSoundBanner);
+    }
+    if (audio.state !== 'running') audio.resume().catch(() => {});
   } catch {
     audio = null;
   }
@@ -41,11 +50,17 @@ function ensureAudio() {
 }
 
 function updateSoundBanner() {
-  $('sound-banner').hidden = !!audio && audio.state === 'running';
+  const on = !!audio && audio.state === 'running';
+  $('sound-banner').hidden = on;
+  $('sound-ok').hidden = !on;
 }
 
 function chime() {
-  if (!audio || audio.state !== 'running') return;
+  if (!audio || audio.state !== 'running') {
+    if (audio) audio.resume().catch(() => {});
+    updateSoundBanner();
+    return;
+  }
   const start = audio.currentTime;
   [880, 1175, 880, 1175].forEach((freq, i) => {
     const osc = audio.createOscillator();
@@ -64,6 +79,7 @@ function chime() {
 
 document.addEventListener('pointerdown', () => { if (started) ensureAudio(); });
 $('sound-banner').addEventListener('click', () => { ensureAudio(); chime(); });
+$('sound-test').addEventListener('click', () => { ensureAudio(); chime(); });
 
 // ---------- เปิดหน้าจอค้างไว้ ----------
 let wakeLock = null;
@@ -79,7 +95,35 @@ async function keepAwake() {
   }
 }
 
-document.addEventListener('visibilitychange', () => { if (started) keepAwake(); });
+document.addEventListener('visibilitychange', () => {
+  if (!started) return;
+  keepAwake();
+  if (document.visibilityState === 'visible' && audio && audio.state !== 'running') audio.resume().catch(() => {});
+  updateSoundBanner();
+});
+
+// ---------- การเชื่อมต่อ ----------
+function isOffline() {
+  return started && (!storeOnline || navigator.onLine === false);
+}
+
+// เน็ตหลุดเกิน 3 วินาทีจึงขึ้นแถบเตือน (ไม่ให้กะพริบตอนสัญญาณสะดุดสั้น ๆ)
+function renderConnection() {
+  if (!isOffline()) {
+    clearTimeout(offlineTimer);
+    offlineTimer = null;
+    $('offline-bar').hidden = true;
+    return;
+  }
+  if (offlineTimer || !$('offline-bar').hidden) return;
+  offlineTimer = setTimeout(() => {
+    offlineTimer = null;
+    if (isOffline()) $('offline-bar').hidden = false;
+  }, 3000);
+}
+
+window.addEventListener('online', renderConnection);
+window.addEventListener('offline', renderConnection);
 
 // ---------- ล็อกอิน ----------
 function showLogin() {
@@ -142,6 +186,11 @@ function showApp() {
     shopOpen = open;
     renderOpen();
   });
+  storeOnline = true;
+  unsubConnection = store.watchConnection((online) => {
+    storeOnline = online;
+    renderConnection();
+  });
 }
 
 function stopApp() {
@@ -149,11 +198,15 @@ function stopApp() {
   report.hide();
   showTab('orders');
   unsubOrders?.();
+  unsubStale?.();
   unsubSoldOut?.();
   unsubOpen?.();
-  unsubOrders = unsubSoldOut = unsubOpen = null;
+  unsubConnection?.();
+  unsubOrders = unsubStale = unsubSoldOut = unsubOpen = unsubConnection = null;
   shopOpen = null;
+  storeOnline = true;
   renderOpen();
+  renderConnection();
   wakeLock?.release().catch(() => {});
 }
 
@@ -161,7 +214,9 @@ function watchToday() {
   today = dayKey();
   $('shop-date').textContent = new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
   unsubOrders?.();
+  unsubStale?.();
   orders = [];
+  stale = [];
   renderOrders();
   unsubOrders = store.watchOrders(today, today, (list) => {
     const arrivals = list.filter((o) => o.status === 'new' && !seen.has(o.id));
@@ -169,6 +224,11 @@ function watchToday() {
     if (!firstSnapshot && arrivals.length) chime();
     firstSnapshot = false;
     orders = list;
+    renderOrders();
+  });
+  // ออเดอร์ของวันก่อนที่ลืมกดเสร็จ: ให้ปิดได้ และนับเป็นยอดขายของวันที่สั่ง
+  unsubStale = store.watchUnfinishedBefore(today, (list) => {
+    stale = list;
     renderOrders();
   });
 }
@@ -218,13 +278,22 @@ function renderOrders() {
       ? list.map(renderTicket)
       : [el('li', { class: 'empty-lane', text: lane === 'new' ? 'ยังไม่มีออเดอร์ใหม่' : 'ไม่มีรายการ' })]));
   }
+  $('stale').hidden = !stale.length;
+  $('count-stale').textContent = stale.length;
+  $('lane-stale').replaceChildren(...stale.map((o) => renderTicket(o, true)));
+
   const waiting = lanes.new.length;
+  $('orders-badge').hidden = !waiting;
+  $('orders-badge-num').textContent = waiting;
   document.title = `${waiting ? `(${waiting}) ` : ''}หน้าร้าน · LOONG JOKE`;
 }
 
-function renderTicket(order) {
+// isStale = ออเดอร์ค้างจากวันก่อน: แสดงวันที่ และกด "เสร็จแล้ว" ได้เลย
+function renderTicket(order, isStale = false) {
   const isBusy = busy.has(order.id);
   const actions = [];
+  const placed = new Date(order.createdAt);
+  const open = order.status === 'new' || order.status === 'making';
 
   if (confirming === order.id) {
     actions.push(el('div', { class: 'ticket-confirm' },
@@ -232,8 +301,8 @@ function renderTicket(order) {
       el('button', { type: 'button', class: 'lj-btn lj-btn-secondary', onclick: () => changeStatus(order, 'cancelled'), text: 'ยกเลิกออเดอร์' }),
       el('button', { type: 'button', class: 'lj-btn lj-btn-quiet', onclick: () => { confirming = null; renderOrders(); }, text: 'ไม่ใช่' })
     ));
-  } else if (order.status === 'new' || order.status === 'making') {
-    const next = order.status === 'new' ? { status: 'making', label: 'เริ่มทำ' } : { status: 'done', label: 'เสร็จแล้ว' };
+  } else if (open) {
+    const next = order.status === 'new' && !isStale ? { status: 'making', label: 'เริ่มทำ' } : { status: 'done', label: 'เสร็จแล้ว' };
     actions.push(
       el('button', { type: 'button', class: 'lj-btn lj-btn-primary', disabled: isBusy, onclick: () => changeStatus(order, next.status), text: isBusy ? 'กำลังบันทึก…' : next.label }),
       el('button', { type: 'button', class: 'lj-btn lj-btn-quiet', disabled: isBusy, onclick: () => { confirming = order.id; renderOrders(); }, text: 'ยกเลิก' })
@@ -255,9 +324,9 @@ function renderTicket(order) {
     el('div', { class: 'ticket-head' },
       el('span', { class: 'ticket-table', text: `โต๊ะ ${order.table}` }),
       el('span', { class: 'ticket-time' },
-        `${shopTime(new Date(order.createdAt))} น.`,
+        isStale ? `${thaiDate(dayKey(placed), { day: 'numeric', month: 'short' })} ${shopTime(placed)} น.` : `${shopTime(placed)} น.`,
         el('br'),
-        order.status === 'new' || order.status === 'making' ? minutesAgo(order.createdAt) : STATUS_LABEL[order.status])
+        open && !isStale ? minutesAgo(order.createdAt) : STATUS_LABEL[order.status])
     ),
     el('ul', { class: 'ticket-lines' }, order.items.map((item) =>
       el('li', { class: 'ticket-line' },

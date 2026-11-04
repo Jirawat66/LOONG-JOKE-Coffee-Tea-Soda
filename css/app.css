@@ -85,6 +85,9 @@ h1, h2, h3 { text-wrap: balance; }
 .sheet-close { position: absolute; top: var(--space-3); right: var(--space-3); z-index: 1; width: 44px; height: 44px; border-radius: var(--radius-pill); border: var(--stroke-mid) solid var(--ink); background: var(--surface-raised); color: var(--ink); font-size: 18px; cursor: pointer; }
 .sheet-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1.2; padding-right: 56px; }
 .sheet-action { width: 100%; }
+/* ปุ่มหลักติดขอบล่างของ sheet เสมอ จอเล็กก็ไม่ต้องเลื่อนหา (พื้นหลังยืดเต็มความกว้าง sheet) */
+.sheet-footer { position: sticky; bottom: 0; z-index: 1; display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: calc(-1 * (var(--space-6) + env(safe-area-inset-bottom, 0px))); padding: var(--space-3) 0 calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); background: var(--surface); box-shadow: 0 0 0 100vmax var(--surface); clip-path: inset(0 -100vmax); }
+.sheet-footer::before { content: ""; position: absolute; top: 0; left: -100vmax; right: -100vmax; border-top: var(--stroke-hair) solid var(--line); }
 
 .item-media { width: 120px; aspect-ratio: 3 / 4; border-radius: var(--radius-sm); overflow: hidden; background: var(--apricot); }
 .item-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
