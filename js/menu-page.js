@@ -1,7 +1,7 @@
 // หน้าเมนูของลูกค้า: index.html?table=5
 import { TABLE_COUNT } from './config.js';
 import { store, isDemo } from './store.js';
-import { shopTime } from './time.js';
+import { shopTime, dayKey } from './time.js';
 import { $, el, baht, photoUrl } from './dom.js';
 
 const MAX_QTY = 20;
@@ -26,6 +26,26 @@ function writeSession(key, value) {
     sessionStorage.setItem(key, JSON.stringify(value));
   } catch {
     // เก็บไม่ได้ก็ยังใช้งานต่อได้ แค่รีเฟรชแล้วตะกร้าจะหาย
+  }
+}
+
+// ออเดอร์ที่มือถือเครื่องนี้สั่ง เก็บใน localStorage เพราะสแกน QR ใหม่จะเปิดแท็บใหม่
+// (sessionStorage หายเมื่อเปิดแท็บใหม่) เก็บเฉพาะของวันนี้: [{ id, day }]
+function readMyOrders() {
+  try {
+    const list = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+    const today = dayKey();
+    return Array.isArray(list) ? list.filter((o) => o && o.id && o.day === today) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeMyOrders(list) {
+  try {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(list));
+  } catch {
+    // เก็บไม่ได้: ออเดอร์ยังถึงร้านปกติ แค่สแกนใหม่แล้วจะไม่เห็นรายการ
   }
 }
 
@@ -246,8 +266,7 @@ $('place-order').addEventListener('click', async () => {
       return { id: item.id, name: item.name, nameTh: item.nameTh, price: item.price, sweetness: l.sweetness, sweetnessName: sweetnessName(l.sweetness), qty: l.qty, note: l.note };
     });
     const id = await store.placeOrder({ table, items, total: cartTotal() });
-    const mine = readSession(ORDERS_KEY, []);
-    writeSession(ORDERS_KEY, [...mine, id]);
+    writeMyOrders([...readMyOrders(), { id, day: dayKey() }]);
     cart = [];
     saveCart();
     $('cart-sheet').close();
@@ -346,7 +365,9 @@ async function start() {
     if ($('cart-sheet').open) renderCart();
   });
   saveCart();
-  readSession(ORDERS_KEY, []).forEach(watchMyOrder);
+  const mine = readMyOrders();
+  writeMyOrders(mine); // ล้างของวันก่อนทิ้ง
+  mine.forEach((o) => watchMyOrder(o.id));
 }
 
 start();
